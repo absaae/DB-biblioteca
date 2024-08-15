@@ -1,0 +1,322 @@
+mysql> CREATE DATABASE biblioteca;
+Query OK, 1 row affected (0.04 sec)
+
+mysql> USE biblioteca;
+Database changed
+mysql> CREATE TABLE AUTOR (IdAutor int NOT NULL PRIMARY KEY, Nombre varchar(40) NOT NULL, Apellidos varchar(50) NOT NULL);
+Query OK, 0 rows affected (0.02 sec)
+
+mysql> CREATE TABLE EDITORIAL (IdEditorial int NOT NULL PRIMARY KEY, Nombre varchar(50) NOT NULL);
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> CREATE TABLE LIBRO (IdLibro int NOT NULL PRIMARY KEY, Titulo varchar(50) NOT NULL, IdEditorial int NOT NULL, Año int NOT NULL, Clasificacion varchar(40) NOT NULL);
+Query OK, 0 rows affected (0.03 sec)
+
+mysql> CREATE TABLE AUTOR_LIBRO (IdAutor int NOT NULL PRIMARY KEY, IdLibro int NOT NULL PRIMARY KEY);
+ERROR 1068 (42000): Multiple primary key defined
+mysql> CREATE TABLE AUTOR_LIBRO (
+    ->     IdAutor int NOT NULL,
+    ->     IdLibro int NOT NULL,
+    ->     PRIMARY KEY (IdAutor, IdLibro)
+    -> );
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> CREATE TABLE USUARIO (IdUsuario int NOT NULL PRIMARY KEY, Nombre varchar(40) NOT NULL, Apellidos varchar(50) NOT NULL);
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> CREATE TABLE PRESTAMO (IdPrestamo int NOT NULL PRIMARY KEY, IdUsuario int NOT NULL, IdLibro int NOT NULL, FechaPrestamo date NOT NULL, FechaEntregado date NOT NULL);
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> ALTER TABLE PRESTAMO
+    -> MODIFY FechaEntregado DATE NULL;
+Query OK, 0 rows affected (0.03 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+mysql> ALTER TABLE editorial
+    -> ADD CONSTRAINT Nombre UNIQUE (Nombre);
+Query OK, 0 rows affected (0.01 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+mysql> ALTER TABLE LIBRO
+    -> ADD CONSTRAINT Clasificacion UNIQUE (Clasificacion);
+Query OK, 0 rows affected (0.01 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+mysql> ALTER TABLE LIBRO
+    -> ADD CONSTRAINT IdEditorial FOREIGN KEY (IdEditorial) REFERENCES EDITORIAL(IdEditorial); 
+Query OK, 0 rows affected (0.02 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+mysql> ALTER TABLE AUTOR_LIBRO
+    -> ADD CONSTRAINT IdAutor FOREIGN KEY (IdAutor) REFERENCES AUTOR(IdAutor);
+Query OK, 0 rows affected (0.02 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+mysql> ALTER TABLE AUTOR_LIBRO
+    -> ADD CONSTRAINT IdLibro FOREIGN KEY (IdLibro) REFERENCES AUTOR(IdLibro);
+ERROR 3734 (HY000): Failed to add the foreign key constraint. Missing column 'IdLibro' for constraint 'IdLibro' in the referenced table 'AUTOR'
+mysql> ALTER TABLE AUTOR_LIBRO
+    -> ALTER TABLE AUTOR_LIBRO ADD CONSTRAINT IdLibro FOREIGN KEY (IdLibro) REFERENCES LIBRO(IdLibro);
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'TABLE AUTOR_LIBRO ADD CONSTRAINT IdLibro FOREIGN KEY (IdLibro) REFERENCES LIBRO(' at line 2
+mysql> ALTER TABLE AUTOR_LIBRO                                                                           -> ADD CONSTRAINT IdLibro FOREIGN KEY (IdLibro) REFERENCES LIBRO(IdLibro);
+Query OK, 0 rows affected (0.03 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+mysql> ALTER TABLE PRESTAMO
+    -> ADD CONSTRAINT IdUsuario FOREIGN KEY (IdUsuario) REFERENCES USUARIO(IdUsuario);
+Query OK, 0 rows affected (0.02 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+mysql> ALTER TABLE PRESTAMO
+    -> ADD CONSTRAINT IdLibro FOREIGN KEY (IdLibro) REFERENCES LIBRO(IdLibro);
+ERROR 1826 (HY000): Duplicate foreign key constraint name 'IdLibro'
+mysql> ALTER TABLE PRESTAMO
+    -> ADD CONSTRAINT IdLibro2 FOREIGN KEY (IdLibro) REFERENCES LIBRO(IdLibro);
+Query OK, 0 rows affected (0.03 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+mysql> ALTER TABLE EDITORIAL
+    -> ADD CONSTRAINT chk_editorial_id CHECK (
+    ->     (IdEditorial BETWEEN 1001 AND 2999) OR
+    ->     (IdEditorial BETWEEN 5001 AND 6999)
+    -> );
+Query OK, 0 rows affected (0.03 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+mysql> ALTER TABLE PRESTAMO
+    -> MODIFY FechaPrestamo TIMESTAMP NOT NULL,
+    -> MODIFY FechaEntregado TIMESTAMP;
+Query OK, 0 rows affected (0.02 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+mysql> CREATE TABLE PRESTAMO (
+    ->     IdPrestamo INT PRIMARY KEY,
+    ->     IdUsuario INT NOT NULL,
+    ->     IdLibro INT NOT NULL,
+    ->     FechaPrestamo TIMESTAMP DEFAULT NOW(),
+    ->     FechaEntregado TIMESTAMP
+    -> );
+ERROR 1050 (42S01): Table 'prestamo' already exists
+mysql> ALTER TABLE PRESTAMO
+    -> MODIFY FechaPrestamo TIMESTAMP DEFAULT NOW();
+Query OK, 0 rows affected (0.02 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+mysql> SHOW TABLES;
++----------------------+
+| Tables_in_biblioteca |
++----------------------+
+| AUTOR                |
+| AUTOR_LIBRO          |
+| EDITORIAL            |
+| LIBRO                |
+| PRESTAMO             |
+| USUARIO              |
++----------------------+
+6 rows in set (0.00 sec)
+
+mysql> SHOW COLUMNS FROM AUTOR;
++-----------+-------------+------+-----+---------+-------+
+| Field     | Type        | Null | Key | Default | Extra |
++-----------+-------------+------+-----+---------+-------+
+| IdAutor   | int         | NO   | PRI | NULL    |       |
+| Nombre    | varchar(40) | NO   |     | NULL    |       |
+| Apellidos | varchar(50) | NO   |     | NULL    |       |
++-----------+-------------+------+-----+---------+-------+
+3 rows in set (0.01 sec)
+
+mysql> INSERT INTO editorial VALUES (5001, 'McGraw-Hill');
+Query OK, 1 row affected (0.00 sec)
+
+mysql> mysql> INSERT INTO editorial VALUES (5002, 'Prentice Hall');
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'mysql> INSERT INTO editorial VALUES (5002, 'Prentice Hall')' at line 1
+mysql> mysql> INSERT INTO editorial VALUES (5003, 'Addison-Wesley');
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'mysql> INSERT INTO editorial VALUES (5003, 'Addison-Wesley')' at line 1
+mysql> mysql> INSERT INTO editorial VALUES (5004, 'Jones and Barlett');
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'mysql> INSERT INTO editorial VALUES (5004, 'Jones and Barlett')' at line 1
+mysql> INSERT INTO editorial VALUES (5002, 'Prentice Hall');
+Query OK, 1 row affected (0.00 sec)
+
+mysql> INSERT INTO editorial VALUES (5003, 'Addison-Wesley');
+Query OK, 1 row affected (0.00 sec)
+
+mysql> INSERT INTO editorial VALUES (5004, 'Jones and Barlett');
+Query OK, 1 row affected (0.00 sec)
+
+mysql> INSERT INTO USUARIO VALUES (1, 'Paolo', 'Tooth');
+Query OK, 1 row affected (0.01 sec)
+
+mysql> INSERT INTO USUARIO VALUES (2, 'Thomas', 'Cormen');
+Query OK, 1 row affected (0.01 sec)
+
+mysql> INSERT INTO USUARIO VALUES (3, 'Daniele', 'Vigo');
+Query OK, 1 row affected (0.00 sec)
+
+mysql> INSERT INTO USUARIO VALUES (4, 'Ian', 'Sommerville');
+Query OK, 1 row affected (0.00 sec)
+
+mysql> INSERT INTO USUARIO VALUES (5, 'David', 'Fogel');
+Query OK, 1 row affected (0.00 sec)
+
+mysql> INSERT INTO USUARIO VALUES (6, 'Carlos', 'Coello');
+Query OK, 1 row affected (0.00 sec)
+
+mysql> INSERT INTO LIBRO VALUES (1, 'Database Management Systems', 5001, 2003, [QA76.9.D3 R36]);
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '[QA76.9.D3 R36])' at line 1
+mysql> INSERT INTO LIBRO VALUES (1, 'Database Management Systems', 5001, 2003, QA76.9.D3 R36);
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'R36)' at line 1
+mysql> INSERT INTO LIBRO VALUES (1, 'Database Management Systems', 5001, 2003, QA76.9.D3R36);
+ERROR 1054 (42S22): Unknown column 'qa76.9.D3R36' in 'field list'
+mysql> INSERT INTO LIBRO VALUES (1, 'Database Management Systems', 5001, 2003,'QA76.9.D3R36');
+Query OK, 1 row affected (0.00 sec)
+
+mysql> INSERT INTO AUTOR VALUES (1, 'Raghu Ramakrishnan');
+ERROR 1136 (21S01): Column count doesn't match value count at row 1
+mysql> INSERT INTO AUTOR VALUES (1, 'Raghu',' Ramakrishnan');
+Query OK, 1 row affected (0.00 sec)
+
+mysql> INSERT INTO AUTOR VALUES (2, 'Johannes', 'Gehrke');
+Query OK, 1 row affected (0.00 sec)
+
+mysql> INSERT INTO AUTOR VALUES (3, 'Hector', 'Garcia-Molina');
+Query OK, 1 row affected (0.00 sec)
+
+mysql> INSERT INTO AUTOR VALUES (4, 'Jeffrey', 'Ullman');
+Query OK, 1 row affected (0.00 sec)
+
+mysql> INSERT INTO AUTOR VALUES (5, 'Jennifer', 'Widom');
+Query OK, 1 row affected (0.01 sec)
+
+mysql> INSERT INTO AUTOR VALUES (6, 'Ramez', 'Elmasri');
+Query OK, 1 row affected (0.00 sec)
+
+mysql> INSERT INTO AUTOR VALUES (7, 'Shamkant', 'Navathe');
+Query OK, 1 row affected (0.01 sec)
+
+mysql> INSERT INTO AUTOR VALUES (8, 'Catherine', 'Ricardo');
+Query OK, 1 row affected (0.00 sec)
+
+mysql> SELECT * FROM LIBRO
+    -> ;
++---------+-----------------------------+-------------+------+---------------+
+| IdLibro | Titulo                      | IdEditorial | Año  | Clasificacion |
++---------+-----------------------------+-------------+------+---------------+
+|       1 | Database Management Systems |        5001 | 2003 | QA76.9.D3R36  |
++---------+-----------------------------+-------------+------+---------------+
+1 row in set (0.00 sec)
+
+mysql> INSERT INTO LIBRO VALUES (2, 'Database Systems: The Complete Book', 5002, 2009, 'QA76.9.D3 G37');
+Query OK, 1 row affected (0.00 sec)
+
+mysql> SELECT * FROM LIBRO;                                                                          +---------+-------------------------------------+-------------+------+---------------+
+| IdLibro | Titulo                              | IdEditorial | Año  | Clasificacion |
++---------+-------------------------------------+-------------+------+---------------+
+|       1 | Database Management Systems         |        5001 | 2003 | QA76.9.D3R36  |
+|       2 | Database Systems: The Complete Book |        5002 | 2009 | QA76.9.D3 G37 |
++---------+-------------------------------------+-------------+------+---------------+
+2 rows in set (0.01 sec)
+
+mysql> INSERT INTO LIBRO VALUES (3, 'A First Course in Database Systems', 5002, 2008, 'QA76.9.D3 U45');
+Query OK, 1 row affected (0.00 sec)
+
+mysql> INSERT INTO LIBRO VALUES (4, 'Fundamentals of Database Systems', 5003, 2011, 'QA76.9.D3 E56'); 
+Query OK, 1 row affected (0.00 sec)
+
+mysql> INSERT INTO LIBRO VALUES (5, 'Fundamentos de Sistemas de Bases de Datos', 5003, 2008, 'QA76.9.D3 E4418');
+Query OK, 1 row affected (0.00 sec)
+
+mysql> INSERT INTO LIBRO VALUES (6, 'Databases Iluminated', 5004, 2004, 'QA76.9.D3 R53');
+Query OK, 1 row affected (0.00 sec)
+
+mysql> SELECT * FROM LIBRO;  
++---------+-------------------------------------------+-------------+------+-----------------+
+| IdLibro | Titulo                                    | IdEditorial | Año  | Clasificacion   |
++---------+-------------------------------------------+-------------+------+-----------------+
+|       1 | Database Management Systems               |        5001 | 2003 | QA76.9.D3R36    |
+|       2 | Database Systems: The Complete Book       |        5002 | 2009 | QA76.9.D3 G37   |
+|       3 | A First Course in Database Systems        |        5002 | 2008 | QA76.9.D3 U45   |
+|       4 | Fundamentals of Database Systems          |        5003 | 2011 | QA76.9.D3 E56   |
+|       5 | Fundamentos de Sistemas de Bases de Datos |        5003 | 2008 | QA76.9.D3 E4418 |
+|       6 | Databases Iluminated                      |        5004 | 2004 | QA76.9.D3 R53   |
++---------+-------------------------------------------+-------------+------+-----------------+
+6 rows in set (0.00 sec)
+
+mysql> SELECT * FROM PRESTAMO;
+Empty set (0.00 sec)
+
+mysql> SHOW TABLES;
++----------------------+
+| Tables_in_biblioteca |
++----------------------+
+| AUTOR                |
+| AUTOR_LIBRO          |
+| EDITORIAL            |
+| LIBRO                |
+| PRESTAMO             |
+| USUARIO              |
++----------------------+
+6 rows in set (0.00 sec)
+
+mysql> SELECT * FROM USUARIO;
++-----------+---------+-------------+
+| IdUsuario | Nombre  | Apellidos   |
++-----------+---------+-------------+
+|         1 | Paolo   | Tooth       |
+|         2 | Thomas  | Cormen      |
+|         3 | Daniele | Vigo        |
+|         4 | Ian     | Sommerville |
+|         5 | David   | Fogel       |
+|         6 | Carlos  | Coello      |
++-----------+---------+-------------+
+6 rows in set (0.00 sec)
+
+mysql> SELECT * FROM LIBRO;
++---------+-------------------------------------------+-------------+------+-----------------+
+| IdLibro | Titulo                                    | IdEditorial | Año  | Clasificacion   |
++---------+-------------------------------------------+-------------+------+-----------------+
+|       1 | Database Management Systems               |        5001 | 2003 | QA76.9.D3R36    |
+|       2 | Database Systems: The Complete Book       |        5002 | 2009 | QA76.9.D3 G37   |
+|       3 | A First Course in Database Systems        |        5002 | 2008 | QA76.9.D3 U45   |
+|       4 | Fundamentals of Database Systems          |        5003 | 2011 | QA76.9.D3 E56   |
+|       5 | Fundamentos de Sistemas de Bases de Datos |        5003 | 2008 | QA76.9.D3 E4418 |
+|       6 | Databases Iluminated                      |        5004 | 2004 | QA76.9.D3 R53   |
++---------+-------------------------------------------+-------------+------+-----------------+
+6 rows in set (0.00 sec)
+
+mysql> INSERT INTO prestamo VALUES (3, 5, 1, '2023-08-11', null);
+Query OK, 1 row affected (0.00 sec)
+
+mysql> INSERT INTO prestamo VALUES (4, 2, 2, '2023-03-14', '2023-06-14');
+Query OK, 1 row affected (0.00 sec)
+
+mysql> INSERT INTO prestamo VALUES (5, 5, 2, '2023-09-10', '2023-09-20');
+Query OK, 1 row affected (0.01 sec)
+
+mysql>  INSERT INTO prestamo VALUES (6, 5, 2, '2024-08-11', null);
+Query OK, 1 row affected (0.00 sec)
+
+mysql> INSERT INTO prestamo VALUES (7, 6, 3, '2024-01-20', '2024-02-25');
+Query OK, 1 row affected (0.00 sec)
+
+mysql> INSERT INTO prestamo VALUES (8, 4, 4, '2023-06-20', '2023-06-24');
+Query OK, 1 row affected (0.00 sec)
+
+mysql> INSERT INTO prestamo VALUES (9, 4, 4, '2024-08-06', null);
+Query OK, 1 row affected (0.00 sec)
+
+mysql> INSERT INTO prestamo VALUES (10, 1, 6, '2023-02-10', '2023-05-11');
+Query OK, 1 row affected (0.00 sec)
+
+mysql> INSERT INTO prestamo VALUES (11, 6, 6, '2023-05-14', '2023-06-13');
+Query OK, 1 row affected (0.00 sec)
+
+mysql> INSERT INTO prestamo VALUES (12, 3, 6, '2023-11-10', '2023-11-20');
+Query OK, 1 row affected (0.01 sec)
+
+mysql> INSERT INTO prestamo VALUES (12, 3, 6, '2023-11-10', '2023-11-20');
+ERROR 1062 (23000): Duplicate entry '12' for key 'prestamo.PRIMARY'
+mysql>  INSERT INTO prestamo VALUES (1, 1, 1, '2023-02-02', '2023-02-10');
+Query OK, 1 row affected (0.00 sec)
+
+mysql> INSERT INTO prestamo VALUES (2, 3, 1, '2023-11-10', '2023-11-20');
+Query OK, 1 row affected (0.00 sec)
